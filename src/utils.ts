@@ -1,3 +1,14 @@
+/**
+ * URL 工具函数库
+ * 这个文件包含了处理 URL 的各种基础工具函数。
+ * 主要功能包括：
+ * 1. URL 的协议（Protocol）处理
+ * 2. 斜杠（/）的添加和删除
+ * 3. URL 路径的拼接和解析
+ * 4. 查询字符串和片段（Fragment）的处理
+ * 5. URL 的规范化
+ */
+
 import { parseURL, stringifyParsedURL } from "./parse";
 import { QueryObject, parseQuery, stringifyQuery, ParsedQuery } from "./query";
 import {
@@ -8,22 +19,31 @@ import {
   encodePath,
 } from "./encoding";
 
+// 严格的协议正则表达式，要求协议后必须跟着一个或两个斜杠
 const PROTOCOL_STRICT_REGEX = /^[\s\w\0+.-]{2,}:([/\\]{1,2})/;
+// 普通的协议正则表达式，协议后的斜杠是可选的
 const PROTOCOL_REGEX = /^[\s\w\0+.-]{2,}:([/\\]{2})?/;
+// 相对协议正则表达式，匹配以两个或更多斜杠开头的URL（如 //example.com）
 const PROTOCOL_RELATIVE_REGEX = /^([/\\]\s*){2,}[^/\\]/;
+// 危险协议正则表达式，用于识别不安全的URL协议
 const PROTOCOL_SCRIPT_RE = /^[\s\0]*(blob|data|javascript|vbscript):$/i;
+// 匹配URL末尾的斜杠、问号或井号
 const TRAILING_SLASH_RE = /\/$|\/\?|\/#/;
+// 匹配以./或/开头的路径
 const JOIN_LEADING_SLASH_RE = /^\.?\//;
 
 /**
- * Check if a path starts with `./` or `../`.
- *
- * @example
- * ```js
- * isRelative("./foo"); // true
- * ```
- *
- * @group utils
+ * 检查路径是否是相对路径
+ * 相对路径以 './' 或 '../' 开头
+ * 
+ * 举例：
+ * - './images/logo.png' => true
+ * - '../styles/main.css' => true
+ * - '/absolute/path' => false
+ * 
+ * 小知识：在文件系统中，
+ * - './' 表示当前目录
+ * - '../' 表示上一级目录
  */
 export function isRelative(inputString: string) {
   return ["./", "../"].some((string_) => inputString.startsWith(string_));
@@ -467,23 +487,28 @@ export function withProtocol(input: string, protocol: string): string {
 }
 
 /**
- * Normlizes the input URL:
- *
- * - Ensures the URL is properly encoded
- * - Ensures pathname starts with a slash
- * - Preserves protocol/host if provided
- *
- * @example
- *
- * ```js
- * normalizeURL("test?query=123 123#hash, test");
- * // Returns "test?query=123%20123#hash,%20test"
- *
- * normalizeURL("http://localhost:3000");
- * // Returns "http://localhost:3000"
- * ```
- *
- * @group utils
+ * 规范化URL
+ * 这个函数会对URL进行全面的清理和标准化处理：
+ * 
+ * 1. 路径编码：把特殊字符（如空格、中文）转换为URL安全的格式
+ *    例如：'我的文件.txt' => '%E6%88%91%E7%9A%84%E6%96%87%E4%BB%B6.txt'
+ * 
+ * 2. 确保路径以斜杠开头
+ *    例如：'api/users' => '/api/users'
+ * 
+ * 3. 保留协议和主机名（如果有的话）
+ *    例如：'http://example.com' 会保持不变
+ * 
+ * 4. 查询字符串的标准化
+ *    例如：'?a=1&a=2' => '?a=1&a=2'（保持顺序和编码）
+ * 
+ * 5. 对hash部分进行编码
+ *    例如：'#部分' => '#%E9%83%A8%E5%88%86'
+ * 
+ * 使用场景：
+ * 1. 发送API请求前规范化URL
+ * 2. 存储URL到数据库前进行标准化
+ * 3. 比较两个URL是否相同时先进行标准化
  */
 export function normalizeURL(input: string): string {
   const parsed = parseURL(input);

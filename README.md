@@ -1,5 +1,17 @@
 # ufo
 
+## 代码阅读推荐顺序
+
+以下是推荐的代码阅读顺序，帮助你循序渐进地理解项目：
+
+1. [src/utils.ts](./src/utils.ts) - 基础工具函数
+2. [src/encoding.ts](./src/encoding.ts) - URL编码相关工具
+3. [src/punycode.ts](./src/punycode.ts) - Punycode域名编码处理
+4. [src/parse.ts](./src/parse.ts) - URL解析相关函数
+5. [src/query.ts](./src/query.ts) - URL查询字符串处理
+6. [src/url.ts](./src/url.ts) - 核心URL处理函数
+7. [src/index.ts](./src/index.ts) - 导出接口定义
+
 [![npm version][npm-version-src]][npm-version-href]
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
 [![bundle][bundle-src]][bundle-href]
